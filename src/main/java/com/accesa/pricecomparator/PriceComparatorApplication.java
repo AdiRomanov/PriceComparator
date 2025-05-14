@@ -1,6 +1,6 @@
 package com.accesa.pricecomparator;
 
-import org.springframework.boot.SpringApplication;
+import  org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication

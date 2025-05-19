@@ -1,23 +1,30 @@
 package com.accesa.pricecomparator.controller;
 
+import com.accesa.pricecomparator.exception.ResourceNotFoundException;
 import com.accesa.pricecomparator.model.Product;
+import com.accesa.pricecomparator.repository.ProductRepositoryInMemory;
+import com.accesa.pricecomparator.service.PriceComparatorService;
 import com.accesa.pricecomparator.util.CsvProductLoader;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-
 
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
 
     private final CsvProductLoader csvLoader;
+    private final ProductRepositoryInMemory productRepo;
+    private final PriceComparatorService comparatorService;
 
-    public ProductController(CsvProductLoader csvLoader) {
+
+
+    public ProductController(CsvProductLoader csvLoader, ProductRepositoryInMemory productRepo,
+                             PriceComparatorService comparatorService) {
         this.csvLoader = csvLoader;
+        this.productRepo = productRepo;
+        this.comparatorService = comparatorService;
     }
 
     @GetMapping("/from-csv")
@@ -39,5 +46,33 @@ public class ProductController {
                 LocalDate.of(2025, 5, 8),
                 "Lidl"
         );
+    }
+
+    // GET /api/products/all
+    @GetMapping("/all")
+    public List<Product> getAllProducts() {
+        return productRepo.getAll();
+    }
+
+    // GET /api/products/store/{store}
+    @GetMapping("/store/{store}")
+    public List<Product> getProductsByStore(@PathVariable String store) {
+        return productRepo.getByStore(store.toLowerCase());
+    }
+
+    // GET /api/products/cheapest-by-name?name=vin%20alb%20demisec&date=2025-05-08
+    @GetMapping("/cheapest-by-name")
+    public Product getCheapestProductByNameAndDate(@RequestParam String name,
+                                                   @RequestParam String date) {
+        LocalDate parsedDate;
+        try {
+            parsedDate = LocalDate.parse(date);
+        } catch (Exception e) {
+            throw new ResourceNotFoundException("Invalid date format. Use yyyy-MM-dd.");
+        }
+
+        return comparatorService.findCheapestStoreForProductByName(name, parsedDate)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Product '" + name + "' not found for date " + date));
     }
 }

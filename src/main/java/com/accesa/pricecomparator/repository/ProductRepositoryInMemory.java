@@ -20,4 +20,12 @@ public class ProductRepositoryInMemory {
     public List<Product> getByStore(String store) {
         return storeProducts.getOrDefault(store, List.of());
     }
+
+    public List<Product> searchByName(String query) {
+        return getAll().stream()
+                .filter(p -> p.getProductName().toLowerCase().contains(query.toLowerCase()))
+                .toList();
+    }
+
+
 }

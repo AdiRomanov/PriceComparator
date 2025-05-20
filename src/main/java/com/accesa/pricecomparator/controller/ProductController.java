@@ -115,4 +115,14 @@ public class ProductController {
         return comparatorService.findSubstitutes(name, parsedDate);
     }
 
+
+    @GetMapping("/search")
+    public List<Product> searchProducts(@RequestParam String query) {
+        List<Product> results = productRepo.searchByName(query);
+        if (results.isEmpty()) {
+            throw new ResourceNotFoundException("No products found for query: " + query);
+        }
+        return results;
+    }
+
 }

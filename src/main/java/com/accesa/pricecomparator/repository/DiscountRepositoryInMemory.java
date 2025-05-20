@@ -29,4 +29,11 @@ public class DiscountRepositoryInMemory {
                         (d.getToDate().isEqual(today) || d.getToDate().isAfter(today)))
                 .toList();
     }
+
+    public List<Discount> getNewDiscounts(LocalDate date) {
+        return getAll().stream()
+                .filter(d -> d.getFromDate().isEqual(date))
+                .toList();
+    }
+
 }

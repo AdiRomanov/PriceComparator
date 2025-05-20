@@ -1,13 +1,12 @@
 package com.accesa.pricecomparator.controller;
 
+import com.accesa.pricecomparator.exception.ResourceNotFoundException;
 import com.accesa.pricecomparator.model.Discount;
 import com.accesa.pricecomparator.repository.DiscountRepositoryInMemory;
 import com.accesa.pricecomparator.util.CsvDiscountLoader;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -47,6 +46,19 @@ public class DiscountController {
                 .sorted((d1, d2) -> Integer.compare(d2.getPercentageOfDiscount(), d1.getPercentageOfDiscount()))
                 .limit(10)
                 .toList();
+    }
+
+    // GET /api/discounts/new?date=2025-05-08
+    @GetMapping("/new")
+    public List<Discount> getNewDiscounts(@RequestParam String date) {
+        LocalDate parsedDate;
+        try {
+            parsedDate = LocalDate.parse(date);
+        } catch (Exception e) {
+            throw new ResourceNotFoundException("Invalid date format. Use yyyy-MM-dd.");
+        }
+
+        return discountRepo.getNewDiscounts(parsedDate);
     }
 
 }

@@ -1,9 +1,6 @@
 package com.accesa.pricecomparator.service;
 
-import com.accesa.pricecomparator.dto.BasketItemResponse;
-import com.accesa.pricecomparator.dto.BasketResponse;
-import com.accesa.pricecomparator.dto.PriceHistoryEntry;
-import com.accesa.pricecomparator.dto.SuggestedSubstitution;
+import com.accesa.pricecomparator.dto.*;
 import com.accesa.pricecomparator.model.Discount;
 import com.accesa.pricecomparator.model.Product;
 import com.accesa.pricecomparator.repository.DiscountRepositoryInMemory;
@@ -240,6 +237,37 @@ public class PriceComparatorService {
                 .toList();
     }
 
+    public List<ProductWithDiscountView> getProductsByBrand(String brand, LocalDate date) {
+        List<Product> products = productRepo.getAll().stream()
+                .filter(p -> p.getBrand() != null && p.getBrand().equalsIgnoreCase(brand))
+                .filter(p -> p.getDate().isEqual(date))
+                .toList();
+
+        List<Discount> discounts = discountRepo.getAll().stream()
+                .filter(d -> !date.isBefore(d.getFromDate()) && !date.isAfter(d.getToDate()))
+                .toList();
+
+        return products.stream()
+                .map(p -> {
+                    double finalPrice = p.getPrice();
+                    Optional<Discount> d = discounts.stream()
+                            .filter(discount -> discount.getProductName().equalsIgnoreCase(p.getProductName())
+                                    && discount.getStore().equalsIgnoreCase(p.getStore()))
+                            .findFirst();
+
+                    if (d.isPresent()) {
+                        finalPrice -= finalPrice * d.get().getPercentageOfDiscount() / 100.0;
+                    }
+
+                    return new ProductWithDiscountView(
+                            p.getProductName(),
+                            p.getStore(),
+                            p.getPrice(),
+                            finalPrice
+                    );
+                })
+                .toList();
+    }
 
 
 }

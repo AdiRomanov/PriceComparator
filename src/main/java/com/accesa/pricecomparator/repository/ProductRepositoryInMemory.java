@@ -4,6 +4,7 @@ import com.accesa.pricecomparator.model.Product;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class ProductRepositoryInMemory {
@@ -25,6 +26,13 @@ public class ProductRepositoryInMemory {
         return getAll().stream()
                 .filter(p -> p.getProductName().toLowerCase().contains(query.toLowerCase()))
                 .toList();
+    }
+
+    public Set<String> getAllBrands() {
+        return getAll().stream()
+                .map(Product::getBrand)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(TreeSet::new)); // sortat alfabetic
     }
 
 

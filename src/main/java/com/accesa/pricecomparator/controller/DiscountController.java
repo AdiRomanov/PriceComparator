@@ -61,4 +61,25 @@ public class DiscountController {
         return discountRepo.getNewDiscounts(parsedDate);
     }
 
+
+    @GetMapping("/above")
+    public List<Discount> getBigDiscounts(@RequestParam double percent,
+                                          @RequestParam String date) {
+        LocalDate parsedDate = LocalDate.parse(date);
+        return discountRepo.getAll().stream()
+                .filter(d -> !parsedDate.isBefore(d.getFromDate()) && !parsedDate.isAfter(d.getToDate()))
+                .filter(d -> d.getPercentageOfDiscount() > percent)
+                .toList();
+    }
+
+
+    @GetMapping("/expiring")
+    public List<Discount> getExpiringDiscounts(@RequestParam String date) {
+        LocalDate parsedDate = LocalDate.parse(date);
+        return discountRepo.getAll().stream()
+                .filter(d -> d.getToDate().isEqual(parsedDate))
+                .toList();
+    }
+
+
 }

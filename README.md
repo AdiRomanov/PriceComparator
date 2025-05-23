@@ -10,8 +10,7 @@ A RESTful backend application for comparing prices, optimizing shopping baskets,
 
 1. Clone this repository
 2. Open in your IDE and run `PriceComparatorApplication.java`
-3. Access Swagger UI at:  
-   👉 `http://localhost:8080/swagger-ui.html`
+3. Access Swagger UI at: 👉 `http://localhost:8080/swagger-ui/index.html`
 
 ---
 

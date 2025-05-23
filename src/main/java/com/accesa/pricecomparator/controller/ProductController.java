@@ -196,7 +196,7 @@ public class ProductController {
                 .toList();
     }
 
-
+    @Operation(summary = "List products that have no discount available")
     @GetMapping("/no-discount")
     public List<Product> getProductsWithoutDiscount(@RequestParam String date) {
         LocalDate parsedDate = LocalDate.parse(date);

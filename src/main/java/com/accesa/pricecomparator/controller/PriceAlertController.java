@@ -8,10 +8,17 @@ import com.accesa.pricecomparator.repository.ProductRepositoryInMemory;
 import com.accesa.pricecomparator.model.Product;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+
 import java.time.LocalDate;
 import java.util.List;
 
 @RestController
+@Tag(name = "Price Alerts", description = "Create and track triggered price alerts")
 @RequestMapping("/api/alerts")
 public class PriceAlertController {
 
@@ -27,14 +34,14 @@ public class PriceAlertController {
         this.discountRepo = discountRepo;
     }
 
-    // 1. Salvează alertă
+    @Operation(summary = "Create a new price alert for a product")
     @PostMapping
     public String createAlert(@RequestBody PriceAlert alert) {
         alertRepo.addAlert(alert);
         return "Alert saved for " + alert.getProductName();
     }
 
-    // 2. Returnează alertele declanșate pentru o zi
+    @Operation(summary = "Return all triggered alerts for a given date")
     @GetMapping("/triggered")
     public List<PriceAlert> getTriggeredAlerts(@RequestParam String date) {
         LocalDate parsedDate = LocalDate.parse(date);

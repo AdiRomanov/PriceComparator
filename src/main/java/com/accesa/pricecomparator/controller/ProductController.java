@@ -10,6 +10,11 @@ import com.accesa.pricecomparator.util.CsvProductLoader;
 import org.springframework.web.bind.annotation.*;
 import com.accesa.pricecomparator.dto.*;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -19,6 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
+@Tag(name = "Products", description = "Product search, filters and comparisons")
 @RequestMapping("/api/products")
 public class ProductController {
 
@@ -37,11 +43,13 @@ public class ProductController {
         this.discountRepo = discountRepo;
     }
 
+    @Operation(summary = "Load sample products from a CSV file")
     @GetMapping("/from-csv")
     public List<Product> getProductsFromCsv() {
         return csvLoader.loadProductsFromCsv("lidl_2025-05-08.csv", "Lidl", LocalDate.of(2025, 5, 8));
     }
 
+    @Operation(summary = "Return a sample hardcoded product (for testing)")
     @GetMapping("/sample")
     public Product getSampleProduct() {
         return new Product(
@@ -58,19 +66,19 @@ public class ProductController {
         );
     }
 
-    // GET /api/products/all
+    @Operation(summary = "Get all products loaded into memory")
     @GetMapping("/all")
     public List<Product> getAllProducts() {
         return productRepo.getAll();
     }
 
-    // GET /api/products/store/{store}
+    @Operation(summary = "Get all products from a specific store")
     @GetMapping("/store/{store}")
     public List<Product> getProductsByStore(@PathVariable String store) {
         return productRepo.getByStore(store.toLowerCase());
     }
 
-    // GET /api/products/cheapest-by-name?name=vin%20alb%20demisec&date=2025-05-08
+    @Operation(summary = "Find the cheapest product by name for a specific date")
     @GetMapping("/cheapest-by-name")
     public Product getCheapestProductByNameAndDate(@RequestParam String name,
                                                    @RequestParam String date) {
@@ -87,7 +95,7 @@ public class ProductController {
     }
 
 
-    // GET /api/products/price-history?name=lapte%20zuzu
+    @Operation(summary = "Get full price history for a product across all dates")
     @GetMapping("/price-history")
     public List<PriceHistoryEntry> getPriceHistory(@RequestParam String name) {
         List<PriceHistoryEntry> history = comparatorService.getPriceHistoryForProduct(name);
@@ -97,7 +105,7 @@ public class ProductController {
         return history;
     }
 
-    // GET /api/products/substitutes?name=lapte%20zuzu&date=2025-05-08
+    @Operation(summary = "Suggest substitute products with similar packaging and category")
     @GetMapping("/substitutes")
     public List<Product> getSubstitutes(@RequestParam String name, @RequestParam String date) {
         LocalDate parsedDate;
@@ -110,7 +118,8 @@ public class ProductController {
         return comparatorService.findSubstitutes(name, parsedDate);
     }
 
-
+    @Operation(summary = "Search products by name fragment")
+    @ApiResponse(responseCode = "200", description = "List of matching products")
     @GetMapping("/search")
     public List<Product> searchProducts(@RequestParam String query) {
         List<Product> results = productRepo.searchByName(query);
@@ -120,12 +129,15 @@ public class ProductController {
         return results;
     }
 
+
+    @Operation(summary = "List all unique product brands available in the system")
     @GetMapping("/brands")
     public Set<String> getAllBrands() {
         return productRepo.getAllBrands();
     }
 
 
+    @Operation(summary = "Get all products by a given brand on a specific date (includes discount info)")
     @GetMapping("/by-brand")
     public List<ProductWithDiscountView> getProductsByBrand(@RequestParam String brand,
                                                             @RequestParam String date) {
@@ -140,6 +152,7 @@ public class ProductController {
     }
 
 
+    @Operation(summary = "Get all products from a specific category on a given day")
     @GetMapping("/by-category")
     public List<Product> getByCategory(@RequestParam String category,
                                        @RequestParam String date) {
@@ -151,6 +164,7 @@ public class ProductController {
     }
 
 
+    @Operation(summary = "Get all products below a given price on a given day")
     @GetMapping("/under-price")
     public List<Product> getUnderPrice(@RequestParam double max,
                                        @RequestParam String date) {
@@ -162,6 +176,7 @@ public class ProductController {
     }
 
 
+    @Operation(summary = "List all stores where a given product is available")
     @GetMapping("/multi-store")
     public Set<String> getStoresWithProduct(@RequestParam String name) {
         return productRepo.getAll().stream()
@@ -170,6 +185,8 @@ public class ProductController {
                 .collect(Collectors.toSet());
     }
 
+
+    @Operation(summary = "List products sorted by price per unit (e.g. RON/l or RON/kg)")
     @GetMapping("/sorted-by-unit-price")
     public List<Product> getSortedByUnitPrice(@RequestParam String date) {
         LocalDate parsedDate = LocalDate.parse(date);
@@ -195,6 +212,8 @@ public class ProductController {
                 .toList();
     }
 
+
+    @Operation(summary = "Compare two products by price and unit price on a specific date")
     @GetMapping("/compare")
     public ProductComparisonResult compareProducts(@RequestParam String name1,
                                                    @RequestParam String name2,

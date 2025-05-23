@@ -6,10 +6,17 @@ import com.accesa.pricecomparator.repository.DiscountRepositoryInMemory;
 import com.accesa.pricecomparator.util.CsvDiscountLoader;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+
 import java.time.LocalDate;
 import java.util.List;
 
 @RestController
+@Tag(name = "Discounts", description = "Access and filter discounts per day, store, and product")
 @RequestMapping("/api/discounts")
 public class DiscountController {
 
@@ -22,24 +29,26 @@ public class DiscountController {
         this.discountRepo = discountRepo;
     }
 
+
+    @Operation(summary = "Load discounts from a sample CSV file")
     @GetMapping("/from-csv")
     public List<Discount> getDiscountsFromCsv() {
         return discountLoader.loadDiscountsFromCsv("lidl_discounts_2025-05-08.csv", "Lidl");
     }
 
-    // GET /api/discounts/all
+    @Operation(summary = "List all loaded discounts")
     @GetMapping("/all")
     public List<Discount> getAllDiscounts() {
         return discountRepo.getAll();
     }
 
-    // GET /api/discounts/store/{store}
+    @Operation(summary = "Get all discounts available in a specific store")
     @GetMapping("/store/{store}")
     public List<Discount> getDiscountsByStore(@PathVariable String store) {
         return discountRepo.getByStore(store.toLowerCase());
     }
 
-    // GET /api/discounts/best
+    @Operation(summary = "Top 10 currently active discounts by percentage")
     @GetMapping("/best")
     public List<Discount> getBestActiveDiscounts() {
         return discountRepo.getActiveDiscounts().stream()
@@ -48,7 +57,7 @@ public class DiscountController {
                 .toList();
     }
 
-    // GET /api/discounts/new?date=2025-05-08
+    @Operation(summary = "Get discounts that started on a specific date")
     @GetMapping("/new")
     public List<Discount> getNewDiscounts(@RequestParam String date) {
         LocalDate parsedDate;
@@ -62,6 +71,7 @@ public class DiscountController {
     }
 
 
+    @Operation(summary = "Get all discounts higher than a given percentage")
     @GetMapping("/above")
     public List<Discount> getBigDiscounts(@RequestParam double percent,
                                           @RequestParam String date) {
@@ -73,6 +83,7 @@ public class DiscountController {
     }
 
 
+    @Operation(summary = "List all discounts expiring on a specific date")
     @GetMapping("/expiring")
     public List<Discount> getExpiringDiscounts(@RequestParam String date) {
         LocalDate parsedDate = LocalDate.parse(date);

@@ -5,6 +5,7 @@ import com.accesa.pricecomparator.model.Discount;
 import com.accesa.pricecomparator.model.Product;
 import com.accesa.pricecomparator.repository.DiscountRepositoryInMemory;
 import com.accesa.pricecomparator.repository.ProductRepositoryInMemory;
+import com.accesa.pricecomparator.util.ProductPredicates;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -12,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+
+
 
 @Service
 public class PriceComparatorService {
@@ -74,7 +77,7 @@ public class PriceComparatorService {
         for (String name : productNames) {
             // Caută produsul optim (cu reducere aplicată dacă există)
             Optional<Product> cheapest = allProducts.stream()
-                    .filter(p -> p.getProductName().equalsIgnoreCase(name) && p.getDate().isEqual(date))
+                    .filter(ProductPredicates.matchesNameAndDate(name, date))
                     .map(p -> {
                         double finalPrice = p.getPrice();
                         Optional<Discount> discountOpt = allDiscounts.stream()

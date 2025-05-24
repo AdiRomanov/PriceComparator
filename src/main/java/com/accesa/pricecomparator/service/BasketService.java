@@ -5,11 +5,12 @@ import com.accesa.pricecomparator.model.Discount;
 import com.accesa.pricecomparator.model.Product;
 import com.accesa.pricecomparator.repository.DiscountRepositoryInMemory;
 import com.accesa.pricecomparator.repository.ProductRepositoryInMemory;
+import com.accesa.pricecomparator.util.DateUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 @Service
 public class BasketService {
@@ -24,7 +25,8 @@ public class BasketService {
     }
 
     public BasketInvoiceResponse getInvoice(BasketRequest request) {
-        LocalDate date = LocalDate.parse(request.getDate());
+        LocalDate date = DateUtils.parse(request.getDate());
+
         List<Product> all = productRepo.getAll();
         List<Discount> discounts = discountRepo.getAll();
 

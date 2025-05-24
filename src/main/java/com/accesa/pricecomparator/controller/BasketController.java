@@ -5,6 +5,8 @@ import com.accesa.pricecomparator.exception.ResourceNotFoundException;
 import com.accesa.pricecomparator.service.BasketService;
 import com.accesa.pricecomparator.service.PriceComparatorService;
 
+import com.accesa.pricecomparator.util.DateUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +21,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.time.LocalDate;
 import java.util.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/basket")
 @Tag(name = "Basket", description = "Endpoints for basket optimization, pricing, and comparisons")
@@ -42,16 +45,10 @@ public class BasketController {
     })
     @PostMapping("/optimize")
     public BasketResponse optimizeBasket(@RequestBody BasketRequest request) {
-        LocalDate parsedDate;
-        try {
-            parsedDate = LocalDate.parse(request.getDate());
-        } catch (Exception e) {
-            throw new ResourceNotFoundException("Invalid date format. Use yyyy-MM-dd.");
-        }
-
+        log.info("Optimize basket request: {}", request);
+        LocalDate parsedDate = DateUtils.parse(request.getDate());
         return comparatorService.optimizeBasket(request.getProductNames(), parsedDate);
     }
-
 
 
     @Operation(summary = "Get a detailed invoice for the selected products",
@@ -61,15 +58,9 @@ public class BasketController {
     })
     @PostMapping("/invoice")
     public BasketInvoiceResponse getInvoice(@RequestBody BasketRequest request) {
-        try {
-            LocalDate.parse(request.getDate());
-        } catch (Exception e) {
-            throw new ResourceNotFoundException("Invalid date format. Use yyyy-MM-dd.");
-        }
-
+        log.info("Get invoice request: {}", request);
         return basketService.getInvoice(request);
     }
-
 
 
     @Operation(summary = "Select best products within a limited budget",
@@ -79,10 +70,9 @@ public class BasketController {
     })
     @PostMapping("/by-budget")
     public BasketResponse getWithinBudget(@RequestBody BudgetRequest request) {
+        log.info("Get within basket request: {}", request);
         return basketService.getWithinBudget(request);
     }
-
-
 
 
     @Operation(summary = "Compare basket prices across multiple days",
@@ -92,9 +82,8 @@ public class BasketController {
     })
     @PostMapping("/compare-days")
     public Map<LocalDate, Double> compareBasketAcrossDays(@RequestBody BasketComparisonRequest req) {
+        log.info("Compare basket prices across multiple days");
         return basketService.compareBasketAcrossDays(req);
     }
-
-
 
 }
